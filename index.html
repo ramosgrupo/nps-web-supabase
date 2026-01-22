@@ -17,88 +17,42 @@
 
     <!-- MAIN -->
     <main class="flex-1 flex items-center justify-center px-2 sm:px-4 overflow-y-auto">
+        <div
+            class="w-full max-w-[420px] sm:max-w-[560px] md:max-w-[760px] lg:max-w-[900px] mx-auto flex flex-col gap-6 px-4">
 
-        <!-- WRAPPER RESPONSIVO GLOBAL -->
-        <div class="
-        w-full
-        max-w-[420px]
-        sm:max-w-[560px]
-        md:max-w-[760px]
-        lg:max-w-[900px]
-        xl:max-w-[960px]
-        mx-auto
-        flex
-        flex-col
-        gap-6
-        px-4
-        sm:px-6
-        md:px-8
-      ">
-
-            <!-- CARD CPF / CNPJ -->
-            <div id="card-identificacao" class="
-          w-full
-          bg-[#ECECEC]
-          rounded-2xl
-          shadow-2xl
-          p-6 md:p-8
-          text-center
-        ">
+            <!-- CARD IDENTIFICAÇÃO -->
+            <div id="card-identificacao" class="w-full bg-[#ECECEC] rounded-2xl shadow-2xl p-6 text-center">
                 <h1 class="text-[#00465D] font-semibold text-lg md:text-2xl mb-6">
-                    Informe seu CPF ou CNPJ
+                    Informe seu Nome e CPF/CNPJ
                 </h1>
 
-                <input id="documento" type="text" placeholder="CPF ou CNPJ" class="
-            w-full
-            max-w-md
-            mx-auto
-            block
-            p-4
-            rounded-xl
-            border border-gray-300
-            text-center
-            text-base md:text-lg
-            focus:outline-none
-            focus:ring-2
-            focus:ring-[#FF4302]
-          " />
+                <input id="nome" type="text" placeholder="Seu nome (opcional)"
+                    class="w-full max-w-md mx-auto block mb-4 p-4 rounded-xl border border-gray-300 text-center focus:outline-none focus:ring-2 focus:ring-[#FF4302]" />
 
-                <button onclick="confirmarDocumento()" class="
-            mt-6
-            bg-[#FF4302]
-            text-white
-            px-8
-            py-3
-            rounded-xl
-            font-semibold
-            transition
-            hover:opacity-90
-            active:scale-95
-          ">
+                <div class="w-full max-w-md mx-auto">
+                    <input id="documento" type="text" inputmode="numeric" placeholder="CPF ou CNPJ"
+                        class="w-full p-4 rounded-xl border border-gray-300 text-center focus:outline-none focus:ring-2 focus:ring-[#FF4302]" />
+
+                    <p id="erro-documento"
+                        class="hidden mt-2 text-sm text-red-600 font-medium text-center">
+                        CPF ou CNPJ inválido. Verifique e tente novamente.
+                    </p>
+                </div>
+
+                <button onclick="confirmarIdentificacao()"
+                    class="mt-6 bg-[#FF4302] text-white px-8 py-3 rounded-xl font-semibold transition hover:opacity-90 active:scale-95">
                     Confirmar
                 </button>
             </div>
 
             <!-- CARD NPS -->
-            <div id="card-nps" class="
-          hidden
-          w-full
-          bg-[#ECECEC]
-          rounded-2xl
-          shadow-2xl
-          p-6 md:p-8
-          text-center
-        ">
+            <div id="card-nps" class="hidden w-full bg-[#ECECEC] rounded-2xl shadow-2xl p-6 text-center">
                 <h1 class="text-[#00465D] text-xl md:text-2xl font-semibold mb-8">
-                    Como foi sua experiência com a CearaGPS hoje?
+                    De 0 a 10, como foi sua experiência?
                 </h1>
 
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-                    <button onclick="enviarNPS(1)" class="card-nps">😡<span>Muito ruim</span></button>
-                    <button onclick="enviarNPS(2)" class="card-nps">😕<span>Ruim</span></button>
-                    <button onclick="enviarNPS(3)" class="card-nps">😐<span>Regular</span></button>
-                    <button onclick="enviarNPS(4)" class="card-nps">😀<span>Boa</span></button>
-                    <button onclick="enviarNPS(5)" class="card-nps">😍<span>Excelente</span></button>
+                <div id="grade-notas"
+                    class="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-11 gap-3 justify-center">
                 </div>
             </div>
 
@@ -107,17 +61,36 @@
 
     <!-- FOOTER -->
     <footer class="w-screen h-32 bg-[#FF4302]">
-        <div class="h-32 w-full bg-no-repeat bg-contain bg-center" style="background-image: url('footer.png');"></div>
+        <div class="h-32 w-full bg-no-repeat bg-contain bg-center"
+            style="background-image: url('footer.png');"></div>
     </footer>
+
+    <!-- TOAST -->
+    <div id="toast"
+        class="hidden fixed bottom-6 right-6 bg-[#00465D] text-white px-6 py-4 rounded-xl shadow-2xl text-sm z-50 w-72">
+        <p class="mb-2">Avaliação enviada com sucesso!</p>
+        <div class="w-full h-1 bg-white/30 rounded overflow-hidden">
+            <div id="toast-progress" class="h-full bg-[#FF4302] toast-progress"></div>
+        </div>
+    </div>
 
     <!-- JS -->
     <script>
         const webhookUrl = "https://webhook.gpsceara.shop/webhook/whnps";
-        let documentoInformado = "";
 
-        // Máscara CPF / CNPJ
+        let nomeInformado = "";
+        let cpfInformado = "";
+        let notaSelecionada = null;
+
+        // Máscara dinâmica CPF / CNPJ
         document.getElementById("documento").addEventListener("input", (e) => {
             let v = e.target.value.replace(/\D/g, "");
+
+            const erro = document.getElementById("erro-documento");
+            e.target.classList.remove("border-red-500");
+            erro.classList.add("hidden");
+
+            if (v.length > 14) v = v.slice(0, 14);
 
             if (v.length <= 11) {
                 v = v.replace(/(\d{3})(\d)/, "$1.$2");
@@ -133,18 +106,112 @@
             e.target.value = v;
         });
 
-        function confirmarDocumento() {
-            const input = document.getElementById("documento").value;
+        function validarCPF(cpf) {
+            cpf = cpf.replace(/\D/g, "");
+            if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
 
-            if (input.replace(/\D/g, "").length < 11) {
-                alert("Informe um CPF ou CNPJ válido.");
+            let soma = 0;
+            for (let i = 0; i < 9; i++) soma += cpf[i] * (10 - i);
+            let d1 = (soma * 10) % 11;
+            if (d1 === 10) d1 = 0;
+            if (d1 != cpf[9]) return false;
+
+            soma = 0;
+            for (let i = 0; i < 10; i++) soma += cpf[i] * (11 - i);
+            let d2 = (soma * 10) % 11;
+            if (d2 === 10) d2 = 0;
+
+            return d2 == cpf[10];
+        }
+
+        function validarCNPJ(cnpj) {
+            cnpj = cnpj.replace(/\D/g, "");
+            if (cnpj.length !== 14 || /^(\d)\1+$/.test(cnpj)) return false;
+
+            let tamanho = 12;
+            let numeros = cnpj.substring(0, tamanho);
+            let digitos = cnpj.substring(tamanho);
+            let soma = 0;
+            let pos = tamanho - 7;
+
+            for (let i = tamanho; i >= 1; i--) {
+                soma += numeros[tamanho - i] * pos--;
+                if (pos < 2) pos = 9;
+            }
+
+            let resultado = soma % 11 < 2 ? 0 : 11 - (soma % 11);
+            if (resultado != digitos[0]) return false;
+
+            tamanho++;
+            numeros = cnpj.substring(0, tamanho);
+            soma = 0;
+            pos = tamanho - 7;
+
+            for (let i = tamanho; i >= 1; i--) {
+                soma += numeros[tamanho - i] * pos--;
+                if (pos < 2) pos = 9;
+            }
+
+            resultado = soma % 11 < 2 ? 0 : 11 - (soma % 11);
+            return resultado == digitos[1];
+        }
+
+        function confirmarIdentificacao() {
+            nomeInformado = document.getElementById("nome").value.trim();
+            const input = document.getElementById("documento");
+            const erro = document.getElementById("erro-documento");
+
+            const valor = input.value.replace(/\D/g, "");
+            let valido = false;
+
+            if (valor.length === 11) valido = validarCPF(valor);
+            else if (valor.length === 14) valido = validarCNPJ(valor);
+
+            if (!valido) {
+                erro.classList.remove("hidden");
+                input.classList.add("border-red-500");
                 return;
             }
 
-            documentoInformado = input;
+            cpfInformado = input.value;
 
             document.getElementById("card-identificacao").classList.add("hidden");
             document.getElementById("card-nps").classList.remove("hidden");
+
+            gerarNotas();
+        }
+
+        function gerarNotas() {
+            const container = document.getElementById("grade-notas");
+            container.innerHTML = "";
+
+            for (let i = 0; i <= 10; i++) {
+                let cor = i <= 3 ? "nps-red" : i <= 6 ? "nps-orange" : i <= 8 ? "nps-green" : "nps-gold";
+
+                container.innerHTML += `
+                    <button onclick="selecionarNota(${i})" class="card-nps ${cor}">
+                        ${i}
+                    </button>
+                `;
+            }
+        }
+
+        function selecionarNota(nota) {
+            notaSelecionada = nota;
+
+            document.getElementById("card-nps").innerHTML = `
+                <h1 class="text-[#00465D] text-xl md:text-2xl font-semibold mb-4">
+                    Deseja deixar alguma observação?
+                </h1>
+
+                <textarea id="observacao" placeholder="Opcional"
+                    class="w-full p-4 rounded-xl border border-gray-300 mb-6 focus:outline-none focus:ring-2 focus:ring-[#FF4302]"></textarea>
+
+                <button onclick="finalizar()"
+                    class="bg-[#FF4302] text-white px-8 py-3 rounded-xl font-semibold transition hover:opacity-90 active:scale-95">
+                    Finalizar
+                </button>
+            `;
         }
 
         function horaavaliacao() {
@@ -153,56 +220,74 @@
             }).replace(" ", "T");
         }
 
+        function finalizar() {
+            const obs = document.getElementById("observacao")?.value || "";
 
-        function enviarNPS(nota) {
             fetch(webhookUrl, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    documento_cpf: documentoInformado,
-                    nota_nps: nota,
+                    nome: nomeInformado,
+                    cpf: cpfInformado,
+                    nota_nps: notaSelecionada,
+                    observacao: obs,
                     hora_avaliacao: horaavaliacao()
                 })
             });
 
             document.getElementById("card-nps").innerHTML = `
-        <h1 class="text-[#00465D] text-xl md:text-2xl font-semibold">
-          Obrigado pela sua avaliação!
-        </h1>
-        <p class="mt-4 text-[#00465D]">
-          Sua opinião é muito importante para nós.
-        </p>
-      `;
+                <h1 class="text-[#00465D] text-xl md:text-2xl font-semibold">
+                    Obrigado pela sua avaliação!
+                </h1>
+                <p class="mt-4 text-[#00465D]">
+                    Sua opinião é muito importante para nós.
+                </p>
+            `;
 
-            setTimeout(() => location.reload(), 4000);
+            const toast = document.getElementById("toast");
+            const progress = document.getElementById("toast-progress");
+
+            progress.classList.remove("toast-progress");
+            void progress.offsetWidth;
+            progress.classList.add("toast-progress");
+
+            toast.classList.remove("hidden");
+
+            setTimeout(() => location.reload(), 5000);
         }
     </script>
 
-    <!-- CARD NPS STYLE -->
+    <!-- STYLE -->
     <style>
         .card-nps {
             background: white;
             border-radius: 1rem;
-            padding: 1.25rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-size: 2.5rem;
+            padding: 1.2rem;
+            font-size: 1.25rem;
+            font-weight: 600;
             transition: all .2s;
             box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
-            border: 2px solid transparent;
+            border: 3px solid;
         }
 
-        .card-nps span {
-            margin-top: .5rem;
-            font-size: .875rem;
-            color: #00465D;
-        }
+        .nps-red { border-color: #ef4444; }
+        .nps-orange { border-color: #fb923c; }
+        .nps-green { border-color: #22c55e; }
+        .nps-gold { border-color: #facc15; }
 
         .card-nps:hover {
-            transform: scale(1.05);
+            transform: scale(1.08);
             box-shadow: 0 8px 20px rgba(0, 0, 0, .25);
-            border-color: #FF4302;
+        }
+
+        .toast-progress {
+            width: 100%;
+            animation: progressBar 5s linear forwards;
+        }
+
+        @keyframes progressBar {
+            from { width: 100%; }
+            to { width: 0%; }
         }
     </style>
 
