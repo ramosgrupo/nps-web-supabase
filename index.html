@@ -33,8 +33,7 @@
                     <input id="documento" type="text" inputmode="numeric" placeholder="CPF ou CNPJ"
                         class="w-full p-4 rounded-xl border border-gray-300 text-center focus:outline-none focus:ring-2 focus:ring-[#FF4302]" />
 
-                    <p id="erro-documento"
-                        class="hidden mt-2 text-sm text-red-600 font-medium text-center">
+                    <p id="erro-documento" class="hidden mt-2 text-sm text-red-600 font-medium text-center">
                         CPF ou CNPJ inválido. Verifique e tente novamente.
                     </p>
                 </div>
@@ -51,28 +50,32 @@
                     De 0 a 10, como foi sua experiência?
                 </h1>
 
-                <div id="grade-notas"
-                    class="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-11 gap-3 justify-center">
+                <p class="text-sm text-[#00465D] mb-4 flex justify-between">
+                    <span>0 = Insatisfeito</span>
+                    <span>10 = Totalmente Satisfeito</span>
+                </p>
+
+                <div id="grade-notas" class="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-11 gap-3 justify-center">
                 </div>
             </div>
 
         </div>
     </main>
-
-    <!-- FOOTER -->
-    <footer class="w-screen h-32 bg-[#FF4302]">
-        <div class="h-32 w-full bg-no-repeat bg-contain bg-center"
-            style="background-image: url('footer.png');"></div>
-    </footer>
-
     <!-- TOAST -->
     <div id="toast"
-        class="hidden fixed bottom-6 right-6 bg-[#00465D] text-white px-6 py-4 rounded-xl shadow-2xl text-sm z-50 w-72">
+        class="hidden fixed bottom-40 right-8 bg-[#00465D] text-white px-6 py-4 rounded-xl shadow-2xl text-sm z-50 w-72">
         <p class="mb-2">Avaliação enviada com sucesso!</p>
         <div class="w-full h-1 bg-white/30 rounded overflow-hidden">
             <div id="toast-progress" class="h-full bg-[#FF4302] toast-progress"></div>
         </div>
     </div>
+
+
+    <!-- FOOTER -->
+    <footer class="w-screen h-32 bg-[#FF4302]">
+        <div class="h-32 w-full bg-no-repeat bg-contain bg-center" style="background-image: url('footer.png');"></div>
+    </footer>
+
 
     <!-- JS -->
     <script>
@@ -186,15 +189,15 @@
             container.innerHTML = "";
 
             for (let i = 0; i <= 10; i++) {
-                let cor = i <= 3 ? "nps-red" : i <= 6 ? "nps-orange" : i <= 8 ? "nps-green" : "nps-gold";
-
                 container.innerHTML += `
-                    <button onclick="selecionarNota(${i})" class="card-nps ${cor}">
-                        ${i}
-                    </button>
-                `;
+            <button onclick="selecionarNota(${i})"
+                class="card-nps nps-${i}">
+                ${i}
+            </button>
+        `;
             }
         }
+
 
         function selecionarNota(nota) {
             notaSelecionada = nota;
@@ -253,41 +256,88 @@
 
             toast.classList.remove("hidden");
 
-            setTimeout(() => location.reload(), 5000);
+            setTimeout(() => location.reload(), 3000);
         }
     </script>
 
     <!-- STYLE -->
     <style>
         .card-nps {
-            background: white;
-            border-radius: 1rem;
-            padding: 1.2rem;
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
             font-size: 1.25rem;
-            font-weight: 600;
-            transition: all .2s;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
-            border: 3px solid;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform .15s ease, box-shadow .15s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, .15);
         }
 
-        .nps-red { border-color: #ef4444; }
-        .nps-orange { border-color: #fb923c; }
-        .nps-green { border-color: #22c55e; }
-        .nps-gold { border-color: #facc15; }
-
         .card-nps:hover {
-            transform: scale(1.08);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, .25);
+            transform: scale(1.1);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, .25);
+        }
+
+        .nps-0 {
+            background: #ef4444;
+        }
+
+        .nps-1 {
+            background: #f05252;
+        }
+
+        .nps-2 {
+            background: #f97316;
+        }
+
+        .nps-3 {
+            background: #fb923c;
+        }
+
+        .nps-4 {
+            background: #facc15;
+        }
+
+        .nps-5 {
+            background: #eab308;
+        }
+
+        .nps-6 {
+            background: #d9f99d;
+        }
+
+        .nps-7 {
+            background: #a3e635;
+        }
+
+        .nps-8 {
+            background: #4ade80;
+        }
+
+        .nps-9 {
+            background: #22c55e;
+        }
+
+        .nps-10 {
+            background: #16a34a;
         }
 
         .toast-progress {
             width: 100%;
-            animation: progressBar 5s linear forwards;
+            animation: progressBar 3s linear forwards;
         }
 
         @keyframes progressBar {
-            from { width: 100%; }
-            to { width: 0%; }
+            from {
+                width: 100%;
+            }
+
+            to {
+                width: 0%;
+            }
         }
     </style>
 
